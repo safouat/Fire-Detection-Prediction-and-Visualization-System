@@ -19,7 +19,7 @@ def telegram():
     print(base_url)
 
 def SMS():
-    client = vonage.Client(key="********", secret="edhWAJ5xMcrBIUTY")
+    client = vonage.Client(key="********", secret="*******")
     sms = vonage.Sms(client)
     responseData = sms.send_message(
         {
@@ -39,7 +39,7 @@ def play_alarm_sound_function():
         s = pygame.mixer.Sound("C:\Users\Abdel\OneDrive\Bureau\Alter Ego - NTO.wav")
         s.play()
 
-video = cv2.VideoCapture('http://192.168.43.29:8080/video')
+video = cv2.VideoCapture('http://192.168.***:8080/video')
 while True:
     grabbed, frame = video.read()
     if not grabbed:
