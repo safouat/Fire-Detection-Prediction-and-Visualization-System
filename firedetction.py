@@ -65,10 +65,104 @@ def detect_fire(frame):
             telegram()
             Telegram = True
 
-#--------------------------------FIRE PREVISION----------------------------#
+#--------------------------------FIRE PREVISION MODELISATION ----------------------------#
+from math import sqrt
 
+NON_brulee = 1
+brulee = 0
+
+def euclidean_distance(V1, V2):
+    distance = 0.0
+    for i in range(len(V1) - 1):
+        distance += (V1[i] - V2[i]) ** 2
+    return sqrt(distance)
+
+def localisation_voisins(DATA, test_vecteur, num_neighbors):
+    distances = []
+    for DATA_vecteur in DATA:
+        dist = euclidean_distance(test_vecteur, DATA_vecteur)
+        distances.append((DATA_vecteur, dist))
+    distances.sort(key=lambda tup: tup[1])
+    
+    voisins = []
+    for i in range(num_neighbors):
+        voisins.append(distances[i][0])
+    return voisins
+
+def predict_classification(train, test_row, num_voisin):
+    voisins = localisation_voisins(train, test_row, num_voisin)
+    classification = [row[-1] for row in voisins]
+    prediction = max(set(classification), key=classification.count)
+    return prediction
+
+# Fonction pour saisir les données du dataset
+def input_dataset():
+    dataset = []
+    while True:
+        try:
+            x = float(input("Entrez la valeur de x (ou un caractère pour quitter) : "))
+            y = float(input("Entrez la valeur de y : "))
+            etat = int(input("Entrez l'état (0 pour Non Brûlée, 1 pour Brûlée) : "))
+            data_point = [x, y, etat]
+            dataset.append(data_point)
+        except ValueError:
+            break
+    return dataset
+
+# Fonction pour tracer une courbe de points
+def plot_points(x_values, y_values, color, marker, label):
+    plt.scatter(x_values, y_values, color=color, marker=marker, label=label)
+
+# Tracer la courbe avant la prédiction
+def plot_before_prediction(dataset):
+    x_non_brulee = []
+    y_non_brulee = []
+    x_brulee = []
+    y_brulee = []
+    for data_point in dataset:
+        x, y, etat = data_point
+        if etat == 0:
+            x_non_brulee.append(x)
+            y_non_brulee.append(y)
+        else:
+            x_brulee.append(x)
+            y_brulee.append(y)
+
+    plt.subplot(1, 2, 1)
+    plot_points(x_non_brulee, y_non_brulee, color='blue', marker='o', label='Non Brûlée')
+    plot_points(x_brulee, y_brulee, color='red', marker='x', label='Brûlée')
+    plt.xlabel('X')
+    plt.ylabel('Y')
+    plt.title('Avant la Prédiction')
+    plt.legend()
+
+# Tracer la courbe après la prédiction
+def plot_after_prediction(dataset, num_neighbors):
+    x_non_brulee_pred = []
+    y_non_brulee_pred = []
+    x_brulee_pred = []
+    y_brulee_pred = []
+    for data_point in dataset:
+        x, y, etat = data_point
+        prediction = predict_classification(dataset, data_point, num_neighbors)
+        if prediction == 0:
+            x_non_brulee_pred.append(x)
+            y_non_brulee_pred.append(y)
+        else:
+            x_brulee_pred.append(x)
+            y_brulee_pred.append(y)
+
+    plt.subplot(1, 2, 2)
+    plot_points(x_non_brulee_pred, y_non_brulee_pred, color='blue', marker='o', label='Non Brûlée (Prédiction)')
+    plot_points(x_brulee_pred, y_brulee_pred, color='red', marker='x', label='Brûlée (Prédiction)')
+    plt.xlabel('X')
+    plt.ylabel('Y')
+    plt.title('Après la Prédiction')
+    plt.legend()
 
 def main():
+    CHOICE==(who are you?firfighter or No)
+    if (choice=="no")
     video = cv2.VideoCapture('http://192.168.***:8080/video')
     while True:
         grabbed, frame = video.read()
@@ -80,6 +174,22 @@ def main():
             break
     cv2.destroyAllWindows()
     video.release()
+    else:
+    print("ENTER DATASET OF YOUR LOCALISATION:")
+    dataset = input_dataset()
+
+
+     num_neighbors = int(input("Enter K: "))
+
+
+     plt.figure(figsize=(12, 6))
+     plot_before_prediction(dataset)
+     plot_after_prediction(dataset, num_neighbors)
+
+
+    plt.tight_layout()
+    plt.show()
+
 
 if __name__ == "__main__":
     main()
