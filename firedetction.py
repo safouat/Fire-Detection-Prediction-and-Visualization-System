@@ -12,13 +12,13 @@ Alarm_Status = False
 wtsp = False
 Telegram = False
 sms = False
-
+#---------------------------TELEGRAM----------------------------------#
 def telegram():
-    base_url = "https://api.telegram.org/bot5158217023:AAFVs40nhJmdvYx@qbkE3_8vJRGYMF06D8A/sendMessage?chat_id=-630103128>&text=Incendie"
+    base_url = "https://api.telegram.org/bot<your_bot_token>/sendMessage?chat_id=<chat_id>&text=Incendie"
     requests.get(base_url)
     print(base_url)
-
-def SMS():
+#------------------------------------------SMS  MESSAGE----------------------------------#
+def send_sms():
     client = vonage.Client(key="********", secret="*******")
     sms = vonage.Sms(client)
     responseData = sms.send_message(
@@ -32,18 +32,15 @@ def SMS():
         print("Message sent successfully.")
     else:
         print("Message failed with error:", responseData["messages"][0]["error-text"])
-
+#--------------------ALARM SOUND--------------------------------#
 def play_alarm_sound_function():
-    while True:
-        pygame.mixer.init()
-        s = pygame.mixer.Sound("C:\Users\Abdel\OneDrive\Bureau\Alter Ego - NTO.wav")
-        s.play()
+    pygame.mixer.init()
+    s = pygame.mixer.Sound("C:\Users\Abdel\OneDrive\Bureau\Alter Ego - NTO.wav")
+    s.play()
 
-video = cv2.VideoCapture('http://192.168.***:8080/video')
-while True:
-    grabbed, frame = video.read()
-    if not grabbed:
-        break
+#----------------------FIRE DETECTION--------------------------------#
+def detect_fire(frame):
+    global Fire_Reported, Alarm_Status, sms, Telegram
     frame = cv2.resize(frame, (960, 540))
     blur = cv2.GaussianBlur(frame, (21, 21), 0)
     hsv = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
@@ -58,18 +55,32 @@ while True:
         Fire_Reported += 1
     cv2.imshow("Detection du feu", output)
     if Fire_Reported >= 1:
-        if Alarm_Status == False:
+        if not Alarm_Status:
             threading.Thread(target=play_alarm_sound_function).start()
             Alarm_Status = True
-        if sms == True:
-            SMS()
+        if not sms:
+            send_sms()
             sms = True
-        if Telegram == False:
+        if not Telegram:
             telegram()
             Telegram = True
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        pygame.quit()
-        break
-cv2.destroyAllWindows()
-video.release()
+
+#--------------------------------FIRE PREVISION----------------------------#
+
+
+def main():
+    video = cv2.VideoCapture('http://192.168.***:8080/video')
+    while True:
+        grabbed, frame = video.read()
+        if not grabbed:
+            break
+        detect_fire(frame)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            pygame.quit()
+            break
+    cv2.destroyAllWindows()
+    video.release()
+
+if __name__ == "__main__":
+    main()
 
