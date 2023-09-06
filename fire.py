@@ -5,6 +5,7 @@ import pygame
 import threading
 import vonage
 import requests
+from math import sqrt
 
 Fire_Reported = 0
 Email_Status = False
@@ -66,7 +67,7 @@ def detect_fire(frame):
             Telegram = True
 
 #--------------------------------FIRE PREVISION MODELISATION ----------------------------#
-from math import sqrt
+
 
 NON_brulee = 1
 brulee = 0
